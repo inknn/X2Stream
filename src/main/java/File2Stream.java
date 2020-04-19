@@ -26,22 +26,26 @@ public class File2Stream implements X2Stream{
                 out = new DataOutputStream(socket.getOutputStream());
 
                 while (true) {
-                    reader = new BufferedReader(new FileReader(file));
+                    FileReader fr = new FileReader(file);
+                    reader = new BufferedReader(fr);
                     String tempString = null;
                     while ((tempString = reader.readLine()) != null) {
                         if (!processedFileList.contains(tempString.strip())) {
                             File logFile = new File(tempString);
-                            BufferedReader logReader = new BufferedReader(new FileReader(logFile));
+                            FileReader fr1 = new FileReader(logFile);
+                            BufferedReader logReader = new BufferedReader(fr1);
                             String log = null;
                             while ((log = logReader.readLine()) != null) {
                                 out.writeBytes(log.strip()+'\n');
                                 out.flush();
                             }
                             logReader.close();
+                            fr1.close();
                         }
                         processedFileList.add(tempString.strip());
                     }
                     reader.close();
+                    fr.close();
                 }
 
             } catch (IOException e) {
