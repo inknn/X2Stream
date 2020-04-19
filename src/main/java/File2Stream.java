@@ -32,6 +32,9 @@ public class File2Stream implements X2Stream{
                     while ((tempString = reader.readLine()) != null) {
                         if (!processedFileList.contains(tempString.strip())) {
                             File logFile = new File(tempString);
+                            if (!logFile.exists()) {
+                                continue;
+                            }
                             FileReader fr1 = new FileReader(logFile);
                             BufferedReader logReader = new BufferedReader(fr1);
                             String log = null;
