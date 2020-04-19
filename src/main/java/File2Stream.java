@@ -28,18 +28,18 @@ public class File2Stream implements X2Stream{
                 while (true) {
                     reader = new BufferedReader(new FileReader(file));
                     String tempString = null;
-                    while ((tempString = reader.readLine().strip()) != null) {
-                        if (!processedFileList.contains(tempString)) {
+                    while ((tempString = reader.readLine()) != null) {
+                        if (!processedFileList.contains(tempString.strip())) {
                             File logFile = new File(tempString);
                             BufferedReader logReader = new BufferedReader(new FileReader(logFile));
                             String log = null;
-                            while ((log = logReader.readLine().strip()) != null) {
-                                out.writeUTF(log);
+                            while ((log = logReader.readLine()) != null) {
+                                out.writeBytes(log.strip()+'\n');
                                 out.flush();
                             }
                             logReader.close();
                         }
-                        processedFileList.add(tempString);
+                        processedFileList.add(tempString.strip());
                     }
                     reader.close();
                 }
