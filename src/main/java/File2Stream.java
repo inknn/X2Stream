@@ -28,7 +28,7 @@ public class File2Stream implements X2Stream{
                 while (true) {
                     FileReader fr = new FileReader(file);
                     reader = new BufferedReader(fr);
-                    String tempString = null;
+                    String tempString;
                     while ((tempString = reader.readLine()) != null) {
                         if (!processedFileList.contains(tempString.strip())) {
                             File logFile = new File(tempString);
@@ -37,15 +37,16 @@ public class File2Stream implements X2Stream{
                             }
                             FileReader fr1 = new FileReader(logFile);
                             BufferedReader logReader = new BufferedReader(fr1);
-                            String log = null;
+                            String log;
                             while ((log = logReader.readLine()) != null) {
                                 out.writeBytes(log.strip()+'\n');
                                 out.flush();
                             }
                             logReader.close();
                             fr1.close();
+                            processedFileList.add(tempString.strip());
                         }
-                        processedFileList.add(tempString.strip());
+
                     }
                     reader.close();
                     fr.close();
