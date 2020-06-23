@@ -1,6 +1,5 @@
 import java.io.BufferedReader;
 import java.io.DataOutputStream;
-import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -8,7 +7,7 @@ import java.net.Socket;
 import org.apache.log4j.Logger;
 
 public class LogStash2Stream implements X2Stream {
-    private static final Logger logger = Logger.getLogger(LogStash2Stream.class);
+    private final Logger logger = Logger.getLogger(LogStash2Stream.class);
     private Socket logStashSocket = null;
     private ServerSocket logStashServerSocket = null;
 
@@ -47,7 +46,7 @@ public class LogStash2Stream implements X2Stream {
                 out.writeBytes(logStashInputString.strip() + '\n');
                 out.flush();
             }
-        } catch (IOException e) {
+        } catch (Exception e) {
             logger.error("Socket error:" + e);
         } finally {
             if (logFlashSocket != null) {

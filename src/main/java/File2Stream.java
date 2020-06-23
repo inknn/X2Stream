@@ -11,18 +11,18 @@ import java.util.List;
 import org.apache.log4j.Logger;
 
 public class File2Stream implements X2Stream {
-    private static final Logger logger = Logger.getLogger(File2Stream.class);
+    private final Logger logger = Logger.getLogger(File2Stream.class);
     private final List<String> processedFileList;
 
     public File2Stream() {
         processedFileList = new ArrayList<>();
     }
 
-    public void sendFile(String filePath, String printSocketLog, int socketOutputPort) {
+    public void sendFile(String logFilePaths, String printSocketLog, int socketOutputPort) {
         ServerSocket server = null;
         Socket socket = null;
         DataOutputStream out = null;
-        File file = new File(filePath);
+        File logFilePathsFile = new File(logFilePaths);
         BufferedReader reader = null;
         try {
             logger.info("Start File2Stream!");
@@ -32,33 +32,23 @@ public class File2Stream implements X2Stream {
             out = new DataOutputStream(socket.getOutputStream());
 
             while (true) {
-                FileReader fr = new FileReader(file);
-                reader = new BufferedReader(fr);
+                FileReader logFilePathsFileReader = new FileReader(logFilePathsFile);
+                reader = new BufferedReader(logFilePathsFileReader);
                 String tempString;
                 while ((tempString = reader.readLine()) != null) {
-                    if (!processedFileList.contains(tempString.strip())) {
-                        File logFile = new File(tempString);
-                        if (!logFile.exists()) {
-                            continue;
+                    File logFile = new File(tempString);
+                    if (logFile.isDirectory()) {
+                        File[] fileList = logFile.listFiles();
+                        for (File file : fileList) {
+                            sendLogFile(file, out, printSocketLog);
                         }
-                        FileReader fr1 = new FileReader(logFile);
-                        BufferedReader logReader = new BufferedReader(fr1);
-                        String log;
-                        while ((log = logReader.readLine()) != null) {
-                            if ("true".equalsIgnoreCase(printSocketLog)) {
-                                logger.info(log.strip());
-                            }
-                            out.writeBytes(log.strip() + '\n');
-                            out.flush();
-                        }
-                        logReader.close();
-                        fr1.close();
-                        processedFileList.add(tempString.strip());
+                    } else {
+                        sendLogFile(logFile, out, printSocketLog);
                     }
-
                 }
+
                 reader.close();
-                fr.close();
+                logFilePathsFileReader.close();
             }
 
         } catch (IOException e) {
@@ -67,7 +57,32 @@ public class File2Stream implements X2Stream {
             if (reader != null) {
                 try {
                     reader.close();
-                } catch (IOException e1) {
+                } catch (IOException ignored) {
+                }
+            }
+        }
+    }
+
+    public void sendLogFile(File file, DataOutputStream out, String printSocketLog) {
+        if (file.exists()) {
+            if (!processedFileList.contains(file.toString())) {
+                try {
+                    logger.info("Begin process file:" + file.toString());
+                    FileReader fr1 = new FileReader(file);
+                    BufferedReader logReader = new BufferedReader(fr1);
+                    String log;
+                    while ((log = logReader.readLine()) != null) {
+                        if ("true".equalsIgnoreCase(printSocketLog)) {
+                            logger.info(log.strip());
+                        }
+                        out.writeBytes(log.strip() + '\n');
+                        out.flush();
+                    }
+                    logReader.close();
+                    fr1.close();
+                    processedFileList.add(file.toString());
+                } catch (Exception e) {
+                    e.printStackTrace();
                 }
             }
         }
